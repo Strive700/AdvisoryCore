@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.FundCoreMetricMapper">
+    <resultMap id="FundCoreMetricResultMap" type="com.xxx.advisoryCore.Entity.FundCoreMetric">
+        <id property="coreid" column="coreid"/>
+        <result property="fundCode" column="fund_code"/>
+        <result property="statDate" column="stat_date"/>
+        <result property="return1m" column="return_1m"/>
+        <result property="returnYtd" column="return_ytd"/>
+        <result property="maxDrawdown1y" column="max_drawdown_1y"/>
+        <result property="annualSharpe" column="annual_sharpe"/>
+        <result property="riskLevel" column="risk_level"/>
+        <result property="qualityScore" column="quality_score"/>
+        <result property="riskAdjScore" column="risk_adj_score"/>
+        <result property="rating" column="rating"/>
+        <result property="assetScore" column="asset_score"/>
+        <result property="researchScore" column="research_score"/>
+        <result property="riskMgmtScore" column="risk_mgmt_score"/>
+        <result property="tenureScore" column="tenure_score"/>
+    </resultMap>
+    <select id="selectByCondition" resultMap="FundCoreMetricResultMap">
+        SELECT *
+        FROM fund_core_mertrics
+        WHERE 1=1
+        <if test="yieldThisYearMin != null">
+            AND tenure_years &gt;= #{yieldThisYearMin}
+        </if>
+        <if test="yieldThisYearMax != null">
+            AND tenure_years &lt;= #{yieldThisYearMax}
+        </if>
+    </select>
+</mapper>

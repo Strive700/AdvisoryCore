@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.FundManagerMapper">
+    <resultMap id="FundManagerResultMap" type="com.xxx.advisoryCore.Entity.FundManager">
+        <id property="managerName" column="manager_name"/>
+        <result property="companyName" column="company_name"/>
+        <result property="managedAssets" column="managed_assets"/>
+        <result property="managedCount" column="managed_count"/>
+        <result property="highestEducation" column="highest_education"/>
+        <result property="tenureYears" column="tenure_years"/>
+        <result property="effectiveAssets" column="effective_assets"/>
+        <result property="equityReturn" column="equity_return"/>
+        <result property="bondReturn" column="bond_return"/>
+        <result property="annualizedReturn" column="annualized_return"/>
+        <result property="winRate" column="win_rate"/>
+    </resultMap>
+    <select id="selectByCondition1" resultMap="FundManagerResultMap">
+        SELECT *
+        FROM fund_managers
+        WHERE 1=1
+        <if test="managerTenureMin != null">
+            AND tenure_years &gt;= #{managerTenureMin}
+        </if>
+        <if test="managerTenureMax != null">
+            AND tenure_years &lt;= #{managerTenureMax}
+        </if>
+    </select>
+    <select id="selectByCondition" resultMap="FundManagerResultMap">
+        SELECT * FROM fund_managers
+        WHERE 1=1
+        <if test="managerName != null and managerName != ''">
+            AND manager_name LIKE CONCAT('%', #{managerName}, '%')
+        </if>
+        <if test="companyName != null and companyName != ''">
+            AND company_name LIKE CONCAT('%', #{companyName}, '%')
+        </if>
+        <if test="tenureYearsMin != null">
+            AND tenure_years &gt;= #{tenureYearsMin}
+        </if>
+        <if test="tenureYearsMax != null">
+            AND tenure_years &lt;= #{tenureYearsMax}
+        </if>
+    </select>
+</mapper>
