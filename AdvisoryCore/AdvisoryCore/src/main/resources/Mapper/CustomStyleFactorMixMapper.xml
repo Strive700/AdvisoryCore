@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.CustomStyleFactorMixMapper">
+
+    <insert id="insertCustomStyleFactorMixes" parameterType="java.util.List">
+        INSERT INTO custom_style_factor_mix (style_factor_id, factor_id, weight, normalized)
+        VALUES
+        <foreach collection="mixes" item="mix" separator=",">
+            (#{mix.styleFactorId}, #{mix.factorId}, #{mix.weight}, #{mix.normalized})
+        </foreach>
+    </insert>
+    
+    <delete id="deleteByStyleFactorId" parameterType="java.lang.Integer">
+        DELETE FROM custom_style_factor_mix WHERE style_factor_id = #{styleFactorId}
+    </delete>
+    
+    <select id="countByStyleFactorId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM custom_style_factor_mix WHERE style_factor_id = #{styleFactorId}
+    </select>
+
+</mapper> 

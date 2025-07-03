@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.RebalanceMapper">
+
+    <insert id="insertRebalanceTask" parameterType="com.xxx.advisoryCore.Entity.RebalanceTask" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO rebalance_tasks (
+            strategy_id,
+            trigger_time,
+            task_type,
+            execute_time,
+            reason,
+            operator
+        ) VALUES (
+            #{strategyId},
+            #{triggerTime},
+            #{taskType},
+            #{executeTime},
+            #{reason},
+            #{operator}
+        )
+    </insert>
+
+    <insert id="insertRebalanceDetails" parameterType="java.util.List">
+        INSERT INTO rebalance_details (
+            task_id,
+            fund_code,
+            old_weight,
+            new_weight,
+            diff
+        ) VALUES
+        <foreach collection="details" item="detail" separator=",">
+            (#{detail.taskId}, #{detail.fundCode}, #{detail.oldWeight}, #{detail.newWeight}, #{detail.diff})
+        </foreach>
+    </insert>
+</mapper>

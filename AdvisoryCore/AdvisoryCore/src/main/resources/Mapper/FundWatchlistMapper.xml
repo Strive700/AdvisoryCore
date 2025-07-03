@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.advisoryCore.Mapper.FundWatchlistMapper">
+    <delete id="deleteById">
+        DELETE FROM fund_watchlist WHERE watchlistid = #{watchlistId}
+    </delete>
+
+    <select id="selectFundWatchlistDetails" resultType="java.util.Map">
+            SELECT
+                f.fund_code,
+                f.fund_name,
+                m.manager_name,
+                f.fund_type,
+                nh.unit_nav AS latest_nav,
+                nh.nav_date AS latest_nav_date,
+                c.return_1m,
+                c.return_ytd,
+                c.max_drawdown_1y,
+                f.operation_cycle,
+                f.fund_size,
+                f.inception_date,
+                c.quality_score
+            FROM
+                fund_watchlist w
+                    JOIN
+                funds f ON w.fund_code = f.fund_code
+                    JOIN
+                fund_managers m ON f.manager_id = m.manager_id
+                    JOIN
+                fund_core_metrics c ON f.fund_code = c.fund_code
+                    JOIN
+                (SELECT fund_code, unit_nav, nav_date
+                 FROM fund_nav_history
+                 WHERE (fund_code, nav_date) IN (
+                     SELECT fund_code, MAX(nav_date)
+                     FROM fund_nav_history
+                     GROUP BY fund_code
+                 )
+                ) nh ON f.fund_code = nh.fund_code
+            WHERE
+                w.alert_flag = TRUE
+            ORDER BY
+                w.watchlistid DESC
+        </select>
+
+    </mapper>
