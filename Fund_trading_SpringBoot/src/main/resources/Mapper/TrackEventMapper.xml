@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.stock_trading_springboot.Mapper.TrackEventMapper">
+    <insert id="insertTrackEvent" parameterType="com.xxx.stock_trading_springboot.Bean.TrackEvent">
+        INSERT INTO track_event (
+            event_id, event_name, module, page_name, trigger_type, target_component, selector, extra_params,
+            user_id, user_name, user_email, user_phone, user_address, user_city, user_state, priority
+        ) VALUES (
+            #{event.event_id}, #{event.event_name}, #{event.module}, #{event.page_name},
+            #{event.trigger_type}, #{event.target_component}, #{event.selector},
+            #{event.extraParamsJson},
+            #{event.user_id}, #{event.user_name}, #{event.user_email}, #{event.user_phone},
+            #{event.user_address}, #{event.user_city}, #{event.user_state},
+            #{event.priority}
+        )
+    </insert>
+
+    <select id="selectTrackEventsByUserId" resultType="com.xxx.stock_trading_springboot.Bean.TrackEvent">
+        SELECT * FROM track_event WHERE user_id = #{user_id}
+    </select>
+
+    <select id="selectAllTrackEvents" resultType="com.xxx.stock_trading_springboot.Bean.TrackEvent">
+        SELECT * FROM track_event
+    </select>
+
+    <select id="countActiveUsers" resultType="int">
+        SELECT COUNT(DISTINCT user_id) FROM track_event
+        WHERE created_at > DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
+    </select>
+
+    <select id="countEvents" resultType="int">
+        SELECT COUNT(*) FROM track_event
+        WHERE created_at > DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
+    </select>
+
+    <select id="getActivePages" resultType="string">
+        SELECT page_name FROM track_event
+        WHERE created_at > DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
+        GROUP BY page_name
+        ORDER BY COUNT(*) DESC
+        LIMIT 10
+    </select>
+
+    <select id="getActiveModules" resultType="string">
+        SELECT module FROM track_event
+        WHERE created_at > DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
+        GROUP BY module
+        ORDER BY COUNT(*) DESC
+        LIMIT 10
+    </select>
+
+    <select id="getActiveUsersTrend" resultType="com.xxx.stock_trading_springboot.Bean.TrendPoint">
+        SELECT DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') AS time, COUNT(DISTINCT user_id) AS value
+        FROM track_event
+        WHERE created_at > DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
+        GROUP BY time
+        ORDER BY time ASC
+    </select>
+
+    <select id="getEventCountTrend" resultType="com.xxx.stock_trading_springboot.Bean.TrendPoint">
+        SELECT DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') AS time, COUNT(*) AS value
+        FROM track_event
+        WHERE created_at > DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
+        GROUP BY time
+        ORDER BY time ASC
+    </select>
+
+    <select id="selectUserEvents" resultType="com.xxx.stock_trading_springboot.Bean.TrackEvent">
+        SELECT * FROM track_event
+        WHERE user_id = #{user_id}
+        ORDER BY created_at DESC
+    </select>
+</mapper> 
