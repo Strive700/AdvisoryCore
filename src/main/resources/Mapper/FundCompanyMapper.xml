@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.FundCompanyMapper">
+
+    <resultMap id="FundCompanyResultMap" type="com.xxx.advisoryCore.Entity.FundCompany">
+        <id property="companyName" column="company_name"/>
+        <result property="establishmentDate" column="establishment_date"/>
+        <result property="registeredCapital" column="registered_capital"/>
+        <result property="firstFundDate" column="first_fund_date"/>
+        <result property="managerCount" column="manager_count"/>
+        <result property="fundCount" column="fund_count"/>
+        <result property="equityCapital" column="equity_capital"/>
+        <result property="effectiveAssets" column="effective_assets"/>
+        <result property="equityReturn" column="equity_return"/>
+        <result property="bondReturn" column="bond_return"/>
+    </resultMap>
+
+    <select id="selectByCondition" resultMap="FundCompanyResultMap">
+        SELECT * FROM fund_companies
+        <where>
+            <if test="companyName != null and companyName != ''">
+                AND company_name LIKE CONCAT('%', #{companyName}, '%')
+            </if>
+            <if test="minEffectiveAssets != null">
+                AND effective_assets &gt;= #{minEffectiveAssets}
+            </if>
+            <if test="maxEffectiveAssets != null">
+                AND effective_assets &lt;= #{maxEffectiveAssets}
+            </if>
+            <if test="minEquityReturn != null">
+                AND equity_return &gt;= #{minEquityReturn}
+            </if>
+            <if test="maxEquityReturn != null">
+                AND equity_return &lt;= #{maxEquityReturn}
+            </if>
+            <if test="minBondReturn != null">
+                AND bond_return &gt;= #{minBondReturn}
+            </if>
+            <if test="maxBondReturn != null">
+                AND bond_return &lt;= #{maxBondReturn}
+            </if>
+        </where>
+    </select>
+
+</mapper>

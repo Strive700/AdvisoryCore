@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.FundMapper">
+    <resultMap id="FundResultMap" type="com.xxx.advisoryCore.Entity.Fund">
+        <id property="fundCode" column="fund_code" />
+        <result property="fundName" column="fund_name" />
+        <result property="fundDescription" column="fund_description" />
+        <result property="managerId" column="manager_id" />
+        <result property="companyId" column="company_id" />
+        <result property="fundType" column="fund_type" />
+        <result property="category" column="category" />
+        <result property="operationCycle" column="operation_cycle" />
+        <result property="fundSize" column="fund_size" />
+        <result property="inceptionDate" column="inception_date" />
+        <result property="feeRate" column="fee_rate" />
+        <result property="stockAsset" column="stock_asset" />
+        <result property="cashAsset" column="cash_asset" />
+        <result property="bondAsset" column="bond_asset" />
+        <result property="depositAsset" column="deposit_asset" />
+        <result property="proportion" column="proportion" />
+    </resultMap>
+    <select id="selectByCondition"  resultMap="FundResultMap">
+        SELECT *
+        FROM funds
+        <where>
+            <if test="establishedFrom != null">
+                AND inception_date &gt;= #{establishedFrom}
+            </if>
+            <if test="establishedTo != null">
+                AND inception_date &lt;= #{establishedTo}
+            </if>
+            <if test="scaleMin != null">
+                AND fund_size &gt;= #{scaleMin}
+            </if>
+            <if test="scaleMax != null">
+                AND fund_size &lt;= #{scaleMax}
+            </if>
+            <if test="feeRateMin != null">
+                AND fee_rate &gt;= #{feeRateMin}
+            </if>
+            <if test="feeRateMax != null">
+                AND fee_rate &lt;= #{feeRateMax}
+            </if>
+            <if test="style != null and style != ''">
+                AND fund_type LIKE CONCAT('%', #{style}, '%')
+            </if>
+            <if test="code != null and code != ''">
+                AND fund_code = #{code}
+            </if>
+        </where>
+    </select>
+    <select id="selectFundImageByCode" resultType="java.util.Map">
+        SELECT
+            f.fund_code,
+            f.fund_name,
+            f.fund_description,
+            f.fund_type,
+            f.category,
+            f.operation_cycle,
+            f.fund_size,
+            f.inception_date,
+            f.fee_rate,
+            f.stock_asset,
+            f.cash_asset,
+            f.bond_asset,
+            f.deposit_asset,
+            f.proportion,
+
+            m.return_1m,
+            m.return_ytd,
+            m.max_drawdown_1y,
+            m.annual_sharpe,
+            m.risk_level,
+            m.quality_score,
+            m.risk_adj_score,
+            m.rating,
+            m.asset_score,
+            m.research_score,
+            m.risk_mgmt_score,
+            m.tenure_score,
+
+            t.tag,
+
+            h.stock_code,
+            h.stock_name,
+            h.ratio,
+            h.market_value,
+            h.share_count,
+            h.disclosure_date,
+            h.ranking,
+            h.industry_tag,
+
+            n.unit_nav,
+            n.accumulated_nav,
+            n.daily_return,
+            n.nav_date,
+            n.share_total
+
+        FROM funds f
+
+-- 取最近核心指标（可以用子查询优化为最新一条）
+                 LEFT JOIN fund_core_metrics m ON f.fund_code = m.fund_code
+            AND m.stat_date = (SELECT MAX(stat_date) FROM fund_core_metrics WHERE fund_code = f.fund_code)
+
+-- 标签（可能多条）
+                 LEFT JOIN fund_tags t ON f.fund_code = t.fund_code
+
+-- 最近披露的持仓（举例只取一条）
+                 LEFT JOIN fund_holdings h ON f.fund_code = h.fund_code
+            AND h.disclosure_date = (SELECT MAX(disclosure_date) FROM fund_holdings WHERE fund_code = f.fund_code)
+
+-- 最新净值信息
+                 LEFT JOIN fund_nav_history n ON f.fund_code = n.fund_code
+            AND n.nav_date = (SELECT MAX(nav_date) FROM fund_nav_history WHERE fund_code = f.fund_code)
+
+        WHERE f.fund_code = #{code};
+
+    </select>
+</mapper>
