@@ -1,34 +1,60 @@
 # 智能投顾系统 (Investment Advisory System)
 
-一个完整的智能投资顾问系统，包含前端Vue.js应用和后端Spring Boot API服务，提供基金投资管理、因子分析、交易指令管理等功能。
+一个完整的智能投资顾问系统，采用微服务架构，包含多个前端应用和后端API服务，通过Nginx反向代理统一管理，提供基金投资管理、因子分析、交易指令管理等功能。
 
+## 部署网站
+部署公网网址：116.62.82.244
 ## 🏗️ 系统架构
 
-本项目采用前后端分离架构：
+本项目采用微服务架构，通过Nginx反向代理统一管理多个应用：
 
-- **前端**: Vue 3 + TypeScript + Element Plus (Investment Advisor)
-- **后端**: Spring Boot + MyBatis + MySQL (AdvisoryCore)
+### 前端应用
+- **Investment Advisor**: Vue 3 + TypeScript + Element Plus (主要投顾系统)
+- **Watch-Vue**: Vue 3 + TypeScript + ECharts (行情监控系统)
+- **Investment_Advisor_Front_Desk-Vue**: Vue 3 + TypeScript (前台管理系统)
+- **AdvisoryCore-Harmony**: HarmonyOS ArkUI (移动端应用)
+
+### 后端服务
+- **AdvisoryCore-SpringBoot**: Spring Boot + MyBatis + MySQL (主要API服务)
+- **AdvisoryCore**: Spring Boot + MyBatis + MySQL (核心业务服务)
 
 ```
 实训项目/
-├── Investment Advisor(2)/     # 前端应用
+├── Investment Advisor(2)/           # 主要投顾系统前端
 │   └── Investment Advisor/
 │       ├── src/
-│       │   ├── components/    # Vue组件
-│       │   ├── views/         # 页面视图
-│       │   ├── router/        # 路由配置
-│       │   └── stores/        # 状态管理
+│       │   ├── components/          # Vue组件
+│       │   ├── views/               # 页面视图
+│       │   ├── router/              # 路由配置
+│       │   └── stores/              # 状态管理
 │       └── package.json
-└── AdvisoryCore/              # 后端API服务
-    └── AdvisoryCore/
-        ├── src/main/java/
-        │   └── com/xxx/advisoryCore/
-        │       ├── Controller/    # REST API控制器
-        │       ├── Service/       # 业务逻辑层
-        │       ├── Entity/        # 数据实体
-        │       ├── Mapper/        # MyBatis映射器
-        │       └── Dto/           # 数据传输对象
-        └── build.gradle
+├── Watch-Vue/                       # 行情监控系统
+│   ├── src/
+│   ├── package.json
+│   └── 埋点接入说明.md
+├── Investment_Advisor_Front_Desk-Vue/ # 前台管理系统
+│   ├── src/
+│   ├── package.json
+│   └── 埋点接入说明.md
+├── AdvisoryCore-SpringBoot/         # 主要API服务
+│   ├── src/
+│   ├── build.gradle
+│   └── gradlew
+├── AdvisoryCore/                    # 核心业务服务
+│   └── AdvisoryCore/
+│       ├── src/main/java/
+│       │   └── com/xxx/advisoryCore/
+│       │       ├── Controller/      # REST API控制器
+│       │       ├── Service/         # 业务逻辑层
+│       │       ├── Entity/          # 数据实体
+│       │       ├── Mapper/          # MyBatis映射器
+│       │       └── Dto/             # 数据传输对象
+│       └── build.gradle
+├── AdvisoryCore-Harmony/            # 移动端应用
+│   ├── entry/
+│   ├── AppScope/
+│   └── oh-package.json5
+└── nginx.conf                       # Nginx反向代理配置
 ```
 
 ## 🚀 主要功能
@@ -58,17 +84,29 @@
 - **调仓任务**: 调仓任务创建和管理
 - **调仓详情**: 调仓明细查看
 
+### 📱 移动端功能
+- **用户认证**: 安全的用户登录系统
+- **基金管理**: 基金信息查看、筛选和管理
+- **衍生因子**: 自定义因子创建和配置
+- **基金备选库**: 基金池管理和筛选
+
+### 📊 行情监控
+- **实时行情**: 股票和基金实时价格监控
+- **图表分析**: 多种技术指标和图表展示
+- **市场数据**: 市场指数和板块分析
+- **数据埋点**: 完整的用户行为数据收集
+
 ## 🛠️ 技术栈
 
 ### 前端技术栈
-- **框架**: Vue 3.5.17
-- **语言**: TypeScript 5.8.0
-- **UI组件**: Element Plus 2.6.1
-- **图表库**: ECharts 5.6.0 + Vue-ECharts 6.7.3
-- **状态管理**: Pinia 3.0.3
-- **路由**: Vue Router 4.5.1
-- **HTTP客户端**: Axios 1.10.0
-- **构建工具**: Vite (rolldown-vite)
+- **主要投顾系统**: Vue 3.5.17 + TypeScript + Element Plus 2.6.1
+- **行情监控系统**: Vue 3.5.13 + TypeScript + ECharts 5.6.0 + Chart.js 4.5.0
+- **前台管理系统**: Vue 3.5.13 + TypeScript + ECharts 5.6.0
+- **移动端应用**: HarmonyOS ArkUI + ArkTS
+- **状态管理**: Pinia 3.0.3 + pinia-plugin-persistedstate 4.3.0
+- **路由**: Vue Router 4.5.0
+- **HTTP客户端**: Axios 1.9.0
+- **构建工具**: Vite 6.2.4
 - **包管理器**: npm
 
 ### 后端技术栈
@@ -77,8 +115,15 @@
 - **数据库**: MySQL
 - **ORM**: MyBatis 3.0.3
 - **分页**: PageHelper 1.4.7
+- **测试覆盖**: Jacoco 0.8.10
 - **构建工具**: Gradle
 - **依赖管理**: Spring Dependency Management 1.1.7
+
+### 部署技术栈
+- **反向代理**: Nginx
+- **负载均衡**: Nginx Upstream
+- **静态资源**: Nginx Static Files
+- **API网关**: Nginx Proxy
 
 ## 📦 安装和运行
 
@@ -88,9 +133,12 @@
 - **Java**: 21
 - **MySQL**: 8.0+
 - **Gradle**: 8.0+
+- **Nginx**: 1.18+
+- **DevEco Studio**: DevEco Studio NEXT Developer Beta1+ (移动端开发)
 
 ### 前端启动
 
+#### 主要投顾系统
 1. **进入前端目录**
 ```bash
 cd "Investment Advisor(2)/Investment Advisor"
@@ -109,11 +157,28 @@ npm run dev
 4. **访问应用**
 打开浏览器访问 `http://localhost:5173`
 
+#### 行情监控系统
+```bash
+cd Watch-Vue
+npm install
+npm run dev
+# 访问 http://localhost:5174
+```
+
+#### 前台管理系统
+```bash
+cd Investment_Advisor_Front_Desk-Vue
+npm install
+npm run dev
+# 访问 http://localhost:5175
+```
+
 ### 后端启动
 
+#### 主要API服务
 1. **进入后端目录**
 ```bash
-cd AdvisoryCore/AdvisoryCore
+cd AdvisoryCore-SpringBoot
 ```
 
 2. **配置数据库**
@@ -127,9 +192,109 @@ cd AdvisoryCore/AdvisoryCore
 4. **API服务地址**
 默认运行在 `http://localhost:8080`
 
+#### 核心业务服务
+```bash
+cd AdvisoryCore/AdvisoryCore
+./gradlew bootRun
+# 默认运行在 http://localhost:9090
+```
+
+### 移动端启动
+
+1. **进入移动端目录**
+```bash
+cd AdvisoryCore-Harmony
+```
+
+2. **安装依赖**
+```bash
+npm install
+```
+
+3. **使用DevEco Studio打开项目**
+4. **连接华为设备或启动模拟器**
+5. **点击运行按钮，选择目标设备**
+
+## 🌐 Nginx反向代理配置
+
+### 配置说明
+系统使用Nginx作为反向代理服务器，统一管理多个前端应用和后端API服务：
+
+```nginx
+# 主要投顾系统
+location / {
+    root   C:/Users/strive/Desktop/整合/portal;
+    index  index.html;
+}
+
+# 前台管理系统
+location /client/ {
+    alias C:/Users/strive/Desktop/整合/dist_client/;
+    index index.html;
+    try_files $uri $uri/ /index.html;
+}
+
+# 行情监控系统
+location /watch/ {
+    alias C:/Users/strive/Desktop/整合/dist_watch/;
+    index index.html;
+    try_files $uri $uri/ /index.html;
+}
+
+# 主要API服务代理
+location http://localhost:8080/ {
+    proxy_pass http://localhost:8080/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+}
+
+# 核心业务服务代理
+location /api2/ {
+    proxy_pass http://localhost:9090/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+}
+```
+
+### 访问地址
+- **主要投顾系统**: `http://localhost/`
+- **前台管理系统**: `http://localhost/client/`
+- **行情监控系统**: `http://localhost/watch/`
+- **主要API服务**: `http://localhost:8080/`
+- **核心业务服务**: `http://localhost/api2/`
+
+### 部署步骤
+1. **构建前端应用**
+```bash
+# 主要投顾系统
+cd "Investment Advisor(2)/Investment Advisor"
+npm run build
+
+# 行情监控系统
+cd Watch-Vue
+npm run build
+
+# 前台管理系统
+cd Investment_Advisor_Front_Desk-Vue
+npm run build
+```
+
+2. **配置Nginx**
+- 将构建产物复制到对应目录
+- 修改nginx.conf中的路径配置
+- 重启Nginx服务
+
+3. **启动后端服务**
+- 确保两个Spring Boot服务正常运行
+- 检查端口8080和9090是否可用
+
 ## 📁 项目结构详解
 
 ### 前端结构
+
+#### 主要投顾系统 (Investment Advisor)
 ```
 src/
 ├── components/          # 组件目录
@@ -150,7 +315,43 @@ src/
 └── assets/             # 静态资源
 ```
 
+#### 行情监控系统 (Watch-Vue)
+```
+src/
+├── components/          # 监控组件
+├── views/              # 页面视图
+├── router/             # 路由配置
+├── stores/             # 状态管理
+└── assets/             # 静态资源
+```
+
+#### 前台管理系统 (Investment_Advisor_Front_Desk-Vue)
+```
+src/
+├── components/          # 管理组件
+├── views/              # 页面视图
+├── router/             # 路由配置
+├── stores/             # 状态管理
+└── assets/             # 静态资源
+```
+
+#### 移动端应用 (AdvisoryCore-Harmony)
+```
+entry/
+├── src/main/ets/       # 主要代码目录
+│   ├── common/         # 公共组件和常量
+│   ├── entryability/   # 应用入口
+│   ├── pages/          # 页面组件
+│   ├── utility/        # 工具类
+│   ├── view/           # 视图组件
+│   └── viewmodel/      # 视图模型
+├── resources/          # 模块资源
+└── module.json5        # 模块配置
+```
+
 ### 后端结构
+
+#### 主要API服务 (AdvisoryCore-SpringBoot)
 ```
 src/main/java/com/xxx/advisoryCore/
 ├── Controller/         # REST API控制器
@@ -165,6 +366,18 @@ src/main/java/com/xxx/advisoryCore/
 │   ├── TradeOrderController.java         # 交易指令
 │   ├── DeliveryOrderController.java      # 交割单
 │   └── RebalanceController.java          # 调仓管理
+├── Service/            # 业务逻辑层
+│   └── ServiceImpl/    # 服务实现
+├── Entity/             # 数据实体
+├── Mapper/             # MyBatis映射器
+├── Dto/                # 数据传输对象
+└── Config/             # 配置类
+```
+
+#### 核心业务服务 (AdvisoryCore)
+```
+src/main/java/com/xxx/advisoryCore/
+├── Controller/         # REST API控制器
 ├── Service/            # 业务逻辑层
 │   └── ServiceImpl/    # 服务实现
 ├── Entity/             # 数据实体
@@ -249,15 +462,75 @@ npm run preview
 
 ## 🚀 部署说明
 
-### 前端部署
-1. 构建生产版本：`npm run build`
-2. 将 `dist` 目录部署到Web服务器
-3. 配置服务器支持SPA路由
+### 开发环境部署
+1. **启动所有前端应用**
+```bash
+# 主要投顾系统
+cd "Investment Advisor(2)/Investment Advisor"
+npm run dev
 
-### 后端部署
-1. 构建JAR包：`./gradlew build`
-2. 运行JAR包：`java -jar build/libs/AdvisoryCore-0.0.1-SNAPSHOT.jar`
-3. 配置生产环境数据库连接
+# 行情监控系统
+cd Watch-Vue
+npm run dev
+
+# 前台管理系统
+cd Investment_Advisor_Front_Desk-Vue
+npm run dev
+```
+
+2. **启动所有后端服务**
+```bash
+# 主要API服务
+cd AdvisoryCore-SpringBoot
+./gradlew bootRun
+
+# 核心业务服务
+cd AdvisoryCore/AdvisoryCore
+./gradlew bootRun
+```
+
+3. **配置Nginx反向代理**
+- 修改nginx.conf配置文件
+- 重启Nginx服务
+
+### 生产环境部署
+1. **构建前端应用**
+```bash
+# 主要投顾系统
+cd "Investment Advisor(2)/Investment Advisor"
+npm run build
+
+# 行情监控系统
+cd Watch-Vue
+npm run build
+
+# 前台管理系统
+cd Investment_Advisor_Front_Desk-Vue
+npm run build
+```
+
+2. **构建后端服务**
+```bash
+# 主要API服务
+cd AdvisoryCore-SpringBoot
+./gradlew build
+
+# 核心业务服务
+cd AdvisoryCore/AdvisoryCore
+./gradlew build
+```
+
+3. **部署配置**
+- 将前端构建产物复制到Nginx配置的对应目录
+- 运行后端JAR包：`java -jar build/libs/AdvisoryCore-0.0.1-SNAPSHOT.jar`
+- 配置生产环境数据库连接
+- 重启Nginx服务
+
+### 移动端部署
+1. **构建HarmonyOS应用**
+- 使用DevEco Studio构建应用
+- 生成HAP包
+- 部署到华为应用市场或设备
 
 ## 🤝 贡献指南
 
@@ -274,7 +547,7 @@ npm run preview
 ## 📞 联系方式
 
 如有问题或建议，请通过以下方式联系：
-- 项目地址：https://github.com/your-username/investment-advisory-system
+- 15637818459
 
 ## 🙏 致谢
 
@@ -284,3 +557,6 @@ npm run preview
 - [Element Plus](https://element-plus.org/)
 - [ECharts](https://echarts.apache.org/)
 - [MyBatis](https://mybatis.org/)
+- [HarmonyOS](https://www.harmonyos.com/)
+- [Nginx](https://nginx.org/)
+- [Chart.js](https://www.chartjs.org/)
