@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.advisoryCore.Mapper.FundFactorMappingMapper">
+    <!-- CategoryFactor字段映射 -->
+    <resultMap id="CategoryFactorMap" type="com.xxx.advisoryCore.Entity.CategoryFactor">
+        <id property="categoryId" column="category_id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="factorList" column="factor_list"/>
+    </resultMap>
+
+    <!-- 通过基金ID查询大类因子信息（factorNames为JSON数组） -->
+    <select id="findCategoryFactorsByFundId" parameterType="string" resultMap="CategoryFactorMap">
+        SELECT cf.*
+        FROM fund_factor_mapping ffm
+        JOIN JSON_TABLE(
+            ffm.factor_names,
+            '$[*]' COLUMNS(factor_name VARCHAR(100) PATH '$')
+        ) j ON 1=1
+        JOIN category_factors cf ON cf.name = j.factor_name
+        WHERE ffm.fund_id = #{fundId}
+    </select>
+</mapper> 

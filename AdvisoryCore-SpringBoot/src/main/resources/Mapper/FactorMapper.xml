@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.FactorMapper">
+
+    <!-- 查询所有因子树节点，按sort_order排序 -->
+    <select id="selectAllFactorTreeNodes" resultType="com.xxx.advisoryCore.Entity.FactorTreeNode">
+        SELECT
+            treeid,
+            parent_id AS parentId,
+            node_name AS nodeName,
+            node_type AS nodeType,
+            factor_id AS factorId,
+            is_leaf AS isLeaf,
+            sort_order AS sortOrder,
+            description
+        FROM factor_tree
+        ORDER BY sort_order ASC
+    </select>
+
+    <!-- 根据因子定义ID查询对应定义 -->
+    <select id="selectFactorDefinitionById" parameterType="int" resultType="com.xxx.advisoryCore.Entity.FactorDefinition">
+        SELECT
+            definitionid,
+            name,
+            display_name AS displayName,
+            factor_type AS factorType,
+            data_type AS dataType,
+            calc_method AS calcMethod,
+            update_frequency AS updateFrequency,
+            enabled
+        FROM factor_definitions
+        WHERE definitionid = #{definitionid} AND enabled = true
+    </select>
+
+    <select id="selectDerivedFactorDataTypes" resultType="map">
+        SELECT  display_name,definitionid,name
+        FROM factor_definitions
+        WHERE factor_type = '衍生因子'
+    </select>
+</mapper>

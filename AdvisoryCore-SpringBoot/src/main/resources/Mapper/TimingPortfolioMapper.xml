@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.TimingPortfolioMapper">
+
+    <!-- 新增择时基金组合 -->
+    <insert id="insertTimingPortfolio" parameterType="com.xxx.advisoryCore.Entity.TimingPortfolio">
+        INSERT INTO timing_portfolios (
+            name, benchmark, feature, audience, scale, fee_rate, allocation_method, fund_allocation
+        ) VALUES (
+            #{name}, #{benchmark}, #{feature}, #{audience}, #{scale}, #{feeRate}, #{allocationMethod}, #{fundAllocation}
+        )
+    </insert>
+
+    <!-- 查询所有择时基金组合 -->
+    <select id="selectAllTimingPortfolios" resultType="com.xxx.advisoryCore.Entity.TimingPortfolio">
+        SELECT timingid, name, benchmark, feature, audience, scale, fee_rate AS feeRate, allocation_method AS allocationMethod, fund_allocation AS fundAllocation
+        FROM timing_portfolios
+    </select>
+
+</mapper> 

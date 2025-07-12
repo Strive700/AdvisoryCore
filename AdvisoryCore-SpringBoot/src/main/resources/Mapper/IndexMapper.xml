@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.IndexMapper">
+
+    <!-- 查询所有指数树节点 -->
+    <select id="selectAllIndexTreeNodes" resultType="com.xxx.advisoryCore.Entity.IndexTreeNode">
+        SELECT
+            indexid,
+            parent_id AS parentId,
+            node_name AS nodeName,
+            node_type AS nodeType,
+            index_id AS indexId,
+            is_leaf AS isLeaf,
+            sort_order AS sortOrder,
+            description
+        FROM index_tree
+        ORDER BY sort_order ASC
+    </select>
+
+    <!-- 根据指数定义ID查询指数定义信息 -->
+    <select id="selectIndexDefinitionById" parameterType="int" resultType="com.xxx.advisoryCore.Entity.IndexDefinition">
+        SELECT
+            definitionid,
+            name,
+            code,
+            category,
+            index_type AS indexType,
+            enabled,
+            description,
+            expected_return AS expectedReturn,
+            expected_std_dev AS expectedStdDev,
+            asset_weight AS assetWeight,
+            constituent_funds AS constituentFunds
+        FROM index_definitions
+        WHERE definitionid = #{definitionid} AND enabled = true
+    </select>
+
+    <!-- 根据指数名称查询指数定义信息 -->
+    <select id="selectIndexDefinitionByName" parameterType="string" resultType="com.xxx.advisoryCore.Entity.IndexDefinition">
+        SELECT
+            definitionid,
+            name,
+            code,
+            category,
+            index_type AS indexType,
+            enabled,
+            description,
+            expected_return AS expectedReturn,
+            expected_std_dev AS expectedStdDev,
+            asset_weight AS assetWeight,
+            constituent_funds AS constituentFunds
+        FROM index_definitions
+        WHERE name = #{name} AND enabled = true
+    </select>
+
+    <!-- 根据指数名称更新指数定义信息 -->
+    <update id="updateIndexDefinitionByName" parameterType="com.xxx.advisoryCore.Entity.IndexDefinition">
+        UPDATE index_definitions
+        SET
+            code = #{code},
+            category = #{category},
+            index_type = #{index_type},
+            enabled = #{enabled},
+            description = #{description}
+        WHERE name = #{name}
+    </update>
+
+    <!-- 查询所有指数定义信息 -->
+    <select id="selectAllIndexDefinitions" resultType="com.xxx.advisoryCore.Entity.IndexDefinition">
+        SELECT
+            definitionid,
+            name,
+            code,
+            category,
+            index_type AS indexType,
+            enabled,
+            description,
+            expected_return AS expectedReturn,
+            expected_std_dev AS expectedStdDev,
+            asset_weight AS assetWeight,
+            constituent_funds AS constituentFunds
+        FROM index_definitions
+    </select>
+
+    <!-- 新增指数定义 -->
+    <insert id="insertIndexDefinition" parameterType="com.xxx.advisoryCore.Entity.IndexDefinition">
+        INSERT INTO index_definitions (
+            name, code, category, index_type, enabled, description,
+            expected_return, expected_std_dev, asset_weight, constituent_funds
+        ) VALUES (
+            #{name}, #{code}, #{category}, #{index_type}, #{enabled}, #{description},
+            #{expectedReturn}, #{expectedStdDev}, #{assetWeight}, #{constituentFunds}
+        )
+    </insert>
+
+</mapper>

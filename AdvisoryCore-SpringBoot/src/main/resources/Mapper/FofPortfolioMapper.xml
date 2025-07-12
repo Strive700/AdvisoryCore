@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.advisoryCore.Mapper.FofPortfolioMapper">
+    <!-- 插入FOF组合 -->
+    <insert id="insertFofPortfolio" parameterType="com.xxx.advisoryCore.Entity.FofPortfolio">
+        INSERT INTO fof_portfolio (
+            portfolio_name, benchmark_index, portfolio_feature, target_audience, allocation_method, weighting_scheme, representative_fund_code, risk_rating
+        ) VALUES (
+            #{portfolioName}, #{benchmarkIndex}, #{portfolioFeature}, #{targetAudience}, #{allocationMethod}, #{weightingScheme}, #{representativeFundCode}, #{riskRating}
+        )
+    </insert>
+
+    <!-- 查询所有FOF组合 -->
+    <select id="selectAllFofPortfolios" resultType="com.xxx.advisoryCore.Entity.FofPortfolio">
+        SELECT * FROM fof_portfolios
+    </select>
+</mapper> 

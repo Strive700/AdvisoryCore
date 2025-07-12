@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.advisoryCore.Mapper.AssetAllocationListMapper">
+    <!-- 插入大类资产配比列表 -->
+    <insert id="insertAssetAllocationList" parameterType="com.xxx.advisoryCore.Entity.AssetAllocationList">
+        INSERT INTO asset_allocation_list (
+            allocation_id, fund_code, weight
+        ) VALUES (
+            #{allocationId}, #{fundCode}, #{weight}
+        )
+    </insert>
+</mapper> 

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.advisoryCore.Mapper.DeliveryOrderMapper">
+
+    <!-- 基础查询条件 -->
+    <sql id="baseWhere">
+        <where>
+            <!-- 只查询已执行或部分成交的交易指令 -->
+
+            
+            <!-- 客户ID过滤 -->
+            <if test="request.customerId != null">
+                AND tor.customer_id = #{request.customerId}
+            </if>
+            
+            <!-- 组合ID过滤 -->
+            <if test="request.portfolioId != null">
+                AND so.portfolio_id = #{request.portfolioId}
+            </if>
+            
+            <!-- 基金代码模糊匹配 -->
+            <if test="request.fundCode != null and request.fundCode != ''">
+                AND so.fund_code LIKE CONCAT('%', #{request.fundCode}, '%')
+            </if>
+            
+            <!-- 交易类型过滤 -->
+            <if test="request.tradeType != null and request.tradeType != ''">
+                AND tor.trade_type = #{request.tradeType}
+            </if>
+            
+            <!-- 交易日期范围过滤 -->
+            <if test="request.tradeDateStart != null">
+                AND tor.trade_time >= #{request.tradeDateStart}
+            </if>
+            <if test="request.tradeDateEnd != null">
+                AND tor.trade_time &lt;= #{request.tradeDateEnd}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 分页查询交割单列表 -->
+    <select id="selectDeliveryOrders" resultType="com.xxx.advisoryCore.Dto.DeliveryOrderResponse">
+        SELECT
+        so.batch_no AS deliveryId,
+        tor.tradeid,
+        tor.customer_id AS customerId,
+        so.portfolio_id AS portfolioId,
+        so.fund_code AS fundCode,
+        so.fund_name AS fundName,
+        tor.trade_type AS tradeType,
+        tor.shares AS executedShares,         -- ✅ 对应原字段 shares
+        tor.amount AS executedAmount,         -- ✅ 对应原字段 amount
+        tor.trade_time AS executionTime,      -- ✅ 对应原字段 trade_time
+        tor.status
+        FROM settlement_order1s so
+        LEFT JOIN trade_orders tor ON so.trade_order_id = tor.tradeid
+        <include refid="baseWhere"/>
+        ORDER BY so.id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+
+    <!-- 查询交割单总数 -->
+    <select id="countDeliveryOrders" resultType="long">
+        SELECT COUNT(*)
+        FROM settlement_order1s so
+        LEFT JOIN trade_orders tor ON so.trade_order_id = tor.tradeid
+        <include refid="baseWhere"/>
+    </select>
+
+</mapper> 

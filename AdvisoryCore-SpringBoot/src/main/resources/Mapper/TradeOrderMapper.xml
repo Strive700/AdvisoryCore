@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.TradeOrderMapper">
+
+    <resultMap id="TradeOrderResultMap" type="com.xxx.advisoryCore.Entity.TradeOrder">
+        <id column="tradeid" property="tradeId"/>
+        <result column="portfolio_id" property="portfolioId"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="fund_code" property="fundCode"/>
+        <result column="trade_type" property="tradeType"/>
+        <result column="trade_amount" property="tradeAmount"/>
+        <result column="trade_quantity" property="tradeQuantity"/>
+        <result column="trade_price" property="tradePrice"/>
+        <result column="status" property="status"/>
+        <result column="fail_reason" property="failReason"/>
+        <result column="operator" property="operator"/>
+        <result column="trade_time" property="tradeTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="replace_order_id" property="replaceOrderId"/>
+    </resultMap>
+
+    <!-- 查询失败交易的条件片段 -->
+        <sql id="failedTradeOrderWhere">
+            <where>
+                status = 'FAILED'
+                <if test="portfolioId != null">
+                    AND portfolio_id = #{portfolioId}
+                </if>
+                <if test="customerId != null">
+                    AND customer_id = #{customerId}
+                </if>
+                <if test="tradeType != null and tradeType != ''">
+                    AND trade_type = #{tradeType}
+                </if>
+                <if test="failReason != null and failReason != ''">
+                    AND fail_reason LIKE CONCAT('%', #{failReason}, '%')
+                </if>
+            </where>
+        </sql>
+
+    <!-- 多条件查询的条件片段 -->
+    <sql id="tradeOrderWhere">
+        <where>
+            <if test="orderType != null and orderType != ''">
+                AND trade_type = #{orderType}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="portfolioId != null">
+                AND portfolio_id = #{portfolioId}
+            </if>
+            <if test="customerId != null">
+                AND customer_id = #{customerId}
+            </if>
+            <if test="startDate != null">
+                AND DATE(trade_time) >= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND DATE(trade_time) &lt;=#{endDate}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 查询失败的交易指令 -->
+    <select id="selectFailedTradeOrders" resultMap="TradeOrderResultMap">
+        SELECT * FROM trade_orders
+        <include refid="failedTradeOrderWhere"/>
+        ORDER BY tradeid DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计失败的交易指令总数 -->
+    <select id="countFailedTradeOrders" resultType="long">
+        SELECT COUNT(*) FROM trade_orders
+        <include refid="failedTradeOrderWhere"/>
+    </select>
+
+    <!-- 根据ID查询交易指令 -->
+    <select id="selectTradeOrderById" resultMap="TradeOrderResultMap">
+        SELECT * FROM trade_orders WHERE tradeid = #{tradeId}
+    </select>
+
+    <insert id="insertTradeOrder" parameterType="com.xxx.advisoryCore.Entity.TradeOrder"
+            useGeneratedKeys="true" keyProperty="tradeId">
+        INSERT INTO trade_orders (
+            portfolio_id, customer_id, fund_code,
+            trade_type, status, fail_reason,
+            trade_time
+        ) VALUES (
+                     #{portfolioId}, #{customerId}, #{fundCode},
+                     #{tradeType}, #{status}, #{failReason},
+                     #{tradeTime}
+                 )
+    </insert>
+
+
+
+    <!-- 更新交易指令的 replace_order_id（不更新时间） -->
+    <update id="updateReplaceOrderId" parameterType="map">
+        UPDATE trade_orders
+        SET replace_order_id = #{replaceOrderId}
+        WHERE tradeid = #{tradeId}
+    </update>
+
+
+    <!-- 多条件分页查询交易指令 -->
+    <select id="selectTradeOrdersByConditions" resultMap="TradeOrderResultMap">
+        SELECT * FROM trade_orders
+        <where>
+            status = 'PENDING'
+            <if test="portfolioId != null">
+                AND portfolio_id = #{portfolioId}
+            </if>
+            <if test="customerId != null">
+                AND customer_id = #{customerId}
+            </if>
+            <if test="fundCode != null and fundCode != ''">
+                AND fund_code = #{fundCode}
+            </if>
+            <if test="tradeType != null and tradeType != ''">
+                AND trade_type = #{tradeType}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="operator != null and operator != ''">
+                AND operator LIKE CONCAT('%', #{operator}, '%')
+            </if>
+            <if test="startTime != null">
+                AND trade_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND trade_time &lt;= #{endTime}
+            </if>
+
+        </where>
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计符合条件的交易指令总数 -->
+    <select id="countTradeOrdersByConditions" resultType="long">
+        SELECT COUNT(*) FROM trade_orders
+        <where>
+            <if test="portfolioId != null">
+                AND portfolio_id = #{portfolioId}
+            </if>
+            <if test="customerId != null">
+                AND customer_id = #{customerId}
+            </if>
+            <if test="fundCode != null and fundCode != ''">
+                AND fund_code = #{fundCode}
+            </if>
+            <if test="tradeType != null and tradeType != ''">
+                AND trade_type = #{tradeType}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="operator != null and operator != ''">
+                AND operator LIKE CONCAT('%', #{operator}, '%')
+            </if>
+            <if test="startTime != null">
+                AND trade_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND trade_time &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据ID列表查询交易指令 -->
+    <select id="selectTradeOrdersByIds" resultMap="TradeOrderResultMap">
+        SELECT * FROM trade_orders
+        WHERE tradeid IN
+        <foreach collection="tradeIds" item="tradeId" open="(" separator="," close=")">
+            #{tradeId}
+        </foreach>
+    </select>
+
+
+
+    <!-- 批量更新交易指令状态为ISSUED -->
+    <update id="updateStatusToIssued">
+        UPDATE trade_orders
+        SET status = 'ISSUED',
+        trade_time = NOW()
+        WHERE tradeid IN
+        <foreach collection="tradeIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+
+    <!-- 根据ID列表查询交易指令（用于批量驳回） -->
+    <select id="selectByIds" resultMap="TradeOrderResultMap">
+        SELECT * FROM trade_orders
+        WHERE tradeid IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <!-- 批量驳回交易指令 -->
+    <update id="batchReject">
+        UPDATE trade_orders
+        SET status = 'REJECTED',
+        fail_reason = #{reason},
+        trade_time = NOW()
+        WHERE tradeid IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND status IN ('PENDING', 'ISSUED')
+    </update>
+
+</mapper>

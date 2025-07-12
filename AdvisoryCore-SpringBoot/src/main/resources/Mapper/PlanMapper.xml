@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.PlanMapper">
+
+    <!-- 查询所有方案 -->
+    <select id="selectAllPlans" resultType="com.xxx.advisoryCore.Entity.Plan">
+        SELECT
+            plan_id AS planId,      -- 方案ID
+            plan_name AS planName,  -- 方案名称
+            index_list AS indexList, -- 指数列表(JSON数组格式)
+            start_date AS startDate, -- 开始日期
+            end_date AS endDate      -- 结束日期
+        FROM plans
+        ORDER BY plan_id ASC
+    </select>
+
+    <!-- 插入新方案 -->
+    <insert id="insertPlan" parameterType="com.xxx.advisoryCore.Entity.Plan">
+        INSERT INTO plans (plan_name, index_list, start_date, end_date)
+        VALUES (#{planName}, #{indexList}, #{startDate}, #{endDate})
+    </insert>
+
+    <!-- 根据方案名称更新方案信息 -->
+    <update id="updatePlanByName" parameterType="com.xxx.advisoryCore.Entity.Plan">
+        UPDATE plans
+        SET index_list = #{indexList},
+            start_date = #{startDate},
+            end_date = #{endDate}
+        WHERE plan_name = #{planName}
+    </update>
+
+    <!-- 根据方案名称删除方案 -->
+    <delete id="deletePlanByName" parameterType="string">
+        DELETE FROM plans WHERE plan_name = #{planName}
+    </delete>
+
+</mapper> 

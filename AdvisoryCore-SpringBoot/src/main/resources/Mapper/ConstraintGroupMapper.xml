@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.ConstraintGroupMapper">
+
+    <!-- 新增约束组定义 -->
+    <insert id="insertConstraintGroup" parameterType="com.xxx.advisoryCore.Entity.ConstraintGroup">
+        INSERT INTO constraint_groups (
+            index_name, reference_metric, ma_reference, buy_limit, sell_limit, user_id
+        ) VALUES (
+            #{indexName}, #{referenceMetric}, #{maReference}, #{buyLimit}, #{sellLimit}, #{userId}
+        )
+    </insert>
+
+</mapper> 

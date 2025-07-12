@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.advisoryCore.Mapper.SettlementOrdersMapper">
+    <insert id="insertSettlementOrder">
+        INSERT INTO settlement_orders (fund_code, fund_name, ratio)
+        VALUES
+        <foreach collection="request.funds" item="fund" separator=",">
+            (#{fund.fundCode}, #{fund.fundName}, #{fund.ratio})
+        </foreach>
+    </insert>
+</mapper> 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.advisoryCore.Mapper.CustomStyleFactorMapper">
+<insert id="insertCustomStyleFactor" parameterType="com.xxx.advisoryCore.Entity.CustomStyleFactor" useGeneratedKeys="true" keyProperty="styleId">
+    INSERT INTO custom_style_factors
+    (name, display_name, description, calc_method, create_time, update_frequency, enabled, style_tag)
+    VALUES
+    (#{name}, #{displayName}, #{description}, #{calcMethod}, #{createTime}, #{updateFrequency}, #{enabled}, #{styleTag})
+</insert>
+</mapper>

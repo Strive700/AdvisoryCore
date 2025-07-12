@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.FundNavHistoryMapper">
+    <resultMap id="PositionResultMap" type="com.xxx.advisoryCore.Entity.FundNavHistory">
+        <result property="fundCode" column="fund_code"/>
+        <result property="navDate" column="nav_date"/>
+        <result property="unitNav" column="unit_nav"/>
+        <result property="accumulatedNav" column="accumulated_nav"/>
+        <result property="dailyReturn" column="daily_return"/>
+        <result property="shareTotal" column="share_total"/>
+    </resultMap>
+</mapper>

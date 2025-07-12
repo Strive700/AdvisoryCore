@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.advisoryCore.Mapper.FundAlertMapper">
+
+    <!-- 插入一条预警记录，自动生成主键 -->
+    <insert id="insertAlert" parameterType="com.xxx.advisoryCore.Entity.FundAlert" useGeneratedKeys="true" keyProperty="alertId">
+        INSERT INTO fund_alerts (
+            fund_code,
+            alert_param,
+            threshold,
+            description,
+            status,
+            create_time
+        ) VALUES (
+                     #{fundCode},
+                     #{alertParam},
+                     #{threshold},
+                     #{description},
+                     0,
+                     NOW()
+                 )
+    </insert>
+
+    <!-- 你后续可以定义查询、更新、删除的映射 -->
+
+</mapper>

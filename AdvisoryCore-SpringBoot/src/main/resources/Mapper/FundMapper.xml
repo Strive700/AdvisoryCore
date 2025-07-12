@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.FundMapper">
+    <resultMap id="FundResultMap" type="com.xxx.advisoryCore.Entity.Fund">
+        <id property="fundCode" column="fund_code" />
+        <result property="fundName" column="fund_name" />
+        <result property="fundDescription" column="fund_description" />
+        <result property="managerId" column="manager_id" />
+        <result property="companyId" column="company_id" />
+        <result property="fundType" column="fund_type" />
+        <result property="category" column="category" />
+        <result property="operationCycle" column="operation_cycle" />
+        <result property="fundSize" column="fund_size" />
+        <result property="inceptionDate" column="inception_date" />
+        <result property="feeRate" column="fee_rate" />
+        <result property="stockAsset" column="stock_asset" />
+        <result property="cashAsset" column="cash_asset" />
+        <result property="bondAsset" column="bond_asset" />
+        <result property="depositAsset" column="deposit_asset" />
+        <result property="proportion" column="proportion" />
+    </resultMap>
+
+    <!-- 基础查询条件 -->
+    <sql id="baseWhere">
+        <where>
+            <!-- 成立日期范围 -->
+            <if test="request.establishedDate != null">
+                <if test="request.establishedDate.from != null">
+                    AND f.inception_date >= #{request.establishedDate.from}
+                </if>
+                <if test="request.establishedDate.to != null">
+                    AND f.inception_date &lt;= #{request.establishedDate.to}
+                </if>
+            </if>
+            
+            <!-- 基金规模范围 -->
+            <if test="request.scale != null">
+                <if test="request.scale.min != null">
+                    AND f.fund_size >= #{request.scale.min}
+                </if>
+                <if test="request.scale.max != null">
+                    AND f.fund_size &lt;= #{request.scale.max}
+                </if>
+            </if>
+            
+            <!-- 管理费率范围 -->
+            <if test="request.feeRate != null">
+                <if test="request.feeRate.min != null">
+                    AND f.fee_rate >= #{request.feeRate.min}
+                </if>
+                <if test="request.feeRate.max != null">
+                    AND f.fee_rate &lt;= #{request.feeRate.max}
+                </if>
+            </if>
+            
+            <!-- 风格归因模糊匹配 -->
+            <if test="request.style != null and request.style != ''">
+                AND f.fund_type LIKE CONCAT('%', #{request.style}, '%')
+            </if>
+            
+            <!-- 基金代码精确匹配 -->
+            <if test="request.code != null and request.code != ''">
+                AND f.fund_code = #{request.code}
+            </if>
+            
+            <!-- 基金经理任职年限范围 -->
+            <if test="request.managerTenure != null">
+                <if test="request.managerTenure.min != null">
+                    AND fm.tenure_years >= #{request.managerTenure.min}
+                </if>
+                <if test="request.managerTenure.max != null">
+                    AND fm.tenure_years &lt;= #{request.managerTenure.max}
+                </if>
+            </if>
+            
+            <!-- 今年以来收益率范围 -->
+            <if test="request.yieldThisYear != null">
+                <if test="request.yieldThisYear.min != null">
+                    AND fcm.return_ytd >= #{request.yieldThisYear.min}
+                </if>
+                <if test="request.yieldThisYear.max != null">
+                    AND fcm.return_ytd &lt;= #{request.yieldThisYear.max}
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <!-- 连表查询基金列表 -->
+    <select id="selectFundsWithJoin" resultType="com.xxx.advisoryCore.Dto.FundDTO">
+        SELECT *
+        FROM (
+        SELECT
+        f.fund_code AS fundCode,
+        f.fund_name AS fundName,
+        fm.manager_name AS managerName,
+        f.fund_type AS fundType,
+        n.unit_nav AS unitNav,
+        n.nav_date AS navDate,
+        c.return_1m AS retrn1m,
+        c.return_ytd AS returnYtd,
+        c.max_drawdown_1y AS maxDrawdown1y,
+        f.operation_cycle AS operationCycle,
+        f.fund_size AS fundSize,
+        f.inception_date AS inceptionDate,
+        c.quality_score AS qualityScore,
+        ROW_NUMBER() OVER (PARTITION BY f.fund_code ORDER BY n.nav_date DESC) AS rn
+        FROM funds f
+        LEFT JOIN fund_managers fm ON f.manager_id = fm.manager_id
+        LEFT JOIN (
+        SELECT t1.*
+        FROM fund_nav_history t1
+        INNER JOIN (
+        SELECT fund_code, MAX(nav_date) AS max_date
+        FROM fund_nav_history
+        GROUP BY fund_code
+        ) t2 ON t1.fund_code = t2.fund_code AND t1.nav_date = t2.max_date
+        ) n ON f.fund_code = n.fund_code
+        LEFT JOIN (
+        SELECT t1.*
+        FROM fund_core_metrics t1
+        INNER JOIN (
+        SELECT fund_code, MAX(stat_date) AS max_date
+        FROM fund_core_metrics
+        GROUP BY fund_code
+        ) t2 ON t1.fund_code = t2.fund_code AND t1.stat_date = t2.max_date
+        ) c ON f.fund_code = c.fund_code
+        <include refid="baseWhere"/>
+        ) t
+        WHERE t.rn = 1
+        ORDER BY t.fundCode
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+
+
+    <!-- 查询基金总数 -->
+    <select id="countFundsWithJoin" resultType="long">
+        SELECT COUNT(DISTINCT f.fund_code)
+        FROM funds f
+        LEFT JOIN fund_managers fm ON f.manager_id = fm.manager_id
+        LEFT JOIN fund_core_metrics fcm ON f.fund_code = fcm.fund_code
+            AND fcm.stat_date = (
+                SELECT MAX(stat_date) 
+                FROM fund_core_metrics 
+                WHERE fund_code = f.fund_code
+            )
+        <include refid="baseWhere"/>
+    </select>
+
+    <!-- 原有的分别查询方法 -->
+    <select id="selectByCondition"  resultMap="FundResultMap">
+        SELECT *
+        FROM funds
+        <where>
+            <if test="establishedFrom != null">
+                AND inception_date &gt;= #{establishedFrom}
+            </if>
+            <if test="establishedTo != null">
+                AND inception_date &lt;= #{establishedTo}
+            </if>
+            <if test="scaleMin != null">
+                AND fund_size &gt;= #{scaleMin}
+            </if>
+            <if test="scaleMax != null">
+                AND fund_size &lt;= #{scaleMax}
+            </if>
+            <if test="feeRateMin != null">
+                AND fee_rate &gt;= #{feeRateMin}
+            </if>
+            <if test="feeRateMax != null">
+                AND fee_rate &lt;= #{feeRateMax}
+            </if>
+            <if test="style != null and style != ''">
+                AND fund_type LIKE CONCAT('%', #{style}, '%')
+            </if>
+            <if test="code != null and code != ''">
+                AND fund_code = #{code}
+            </if>
+        </where>
+    </select>
+    
+    <select id="selectFundImageByCode" resultType="java.util.Map">
+        SELECT
+            f.fund_code,
+            f.fund_name,
+            f.fund_description,
+            f.fund_type,
+            f.category,
+            f.operation_cycle,
+            f.fund_size,
+            f.inception_date,
+            f.fee_rate,
+            f.stock_asset,
+            f.cash_asset,
+            f.bond_asset,
+            f.deposit_asset,
+            f.proportion,
+
+            m.return_1m,
+            m.return_ytd,
+            m.max_drawdown_1y,
+            m.annual_sharpe,
+            m.risk_level,
+            m.quality_score,
+            m.risk_adj_score,
+            m.rating,
+            m.asset_score,
+            m.research_score,
+            m.risk_mgmt_score,
+            m.tenure_score,
+
+            t.tag,
+
+            h.stock_code,
+            h.stock_name,
+            h.ratio,
+            h.market_value,
+            h.share_count,
+            h.disclosure_date,
+            h.ranking,
+            h.industry_tag,
+
+            n.unit_nav,
+            n.accumulated_nav,
+            n.daily_return,
+            n.nav_date,
+            n.share_total
+
+        FROM funds f
+
+-- 取最近核心指标（可以用子查询优化为最新一条）
+                 LEFT JOIN fund_core_metrics m ON f.fund_code = m.fund_code
+            AND m.stat_date = (SELECT MAX(stat_date) FROM fund_core_metrics WHERE fund_code = f.fund_code)
+
+-- 标签（可能多条）
+                 LEFT JOIN fund_tags t ON f.fund_code = t.fund_code
+
+-- 最近披露的持仓（举例只取一条）
+                 LEFT JOIN fund_holdings h ON f.fund_code = h.fund_code
+            AND h.disclosure_date = (SELECT MAX(disclosure_date) FROM fund_holdings WHERE fund_code = f.fund_code)
+
+-- 最新净值信息
+                 LEFT JOIN fund_nav_history n ON f.fund_code = n.fund_code
+            AND n.nav_date = (SELECT MAX(nav_date) FROM fund_nav_history WHERE fund_code = f.fund_code)
+
+        WHERE f.fund_code = #{code};
+
+    </select>
+</mapper>

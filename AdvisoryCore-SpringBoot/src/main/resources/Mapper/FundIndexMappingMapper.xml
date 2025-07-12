@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.advisoryCore.Mapper.FundIndexMappingMapper">
+    <!--
+        根据指数名称查询所有包含该指数的基金详细信息（含核心指标）
+        参数: indexName
+        返回: FundWithCoreMetricDTO 列表
+    -->
+    <select id="findFundsByIndexName" parameterType="string" resultType="com.xxx.advisoryCore.Dto.FundWithCoreMetricDTO">
+        SELECT
+            f.fund_code AS fundCode,
+            f.fund_name AS fundName,
+            f.fund_description AS fundDescription,
+            f.manager_id AS managerId,
+            f.company_id AS companyId,
+            f.fund_type AS fundType,
+            f.category AS category,
+            f.operation_cycle AS operationCycle,
+            f.fund_size AS fundSize,
+            f.inception_date AS inceptionDate,
+            f.fee_rate AS feeRate,
+            f.stock_asset AS stockAsset,
+            f.cash_asset AS cashAsset,
+            f.bond_asset AS bondAsset,
+            f.deposit_asset AS depositAsset,
+            f.proportion AS proportion,
+            c.coreid AS coreid,
+            c.stat_date AS statDate,
+            c.return_1m AS return1m,
+            c.return_ytd AS returnYtd,
+            c.max_drawdown_1y AS maxDrawdown1y,
+            c.annual_sharpe AS annualSharpe,
+            c.risk_level AS riskLevel,
+            c.quality_score AS qualityScore,
+            c.risk_adj_score AS riskAdjScore,
+            c.rating AS rating,
+            c.asset_score AS assetScore,
+            c.research_score AS researchScore,
+            c.risk_mgmt_score AS riskMgmtScore,
+            c.tenure_score AS tenureScore
+        FROM fund_index_mapping m
+        JOIN funds f ON m.fund_id = f.fund_code
+        LEFT JOIN (
+            SELECT t1.*
+            FROM fund_core_metrics t1
+            INNER JOIN (
+                SELECT fund_code, MAX(stat_date) AS max_date
+                FROM fund_core_metrics
+                GROUP BY fund_code
+            ) t2 ON t1.fund_code = t2.fund_code AND t1.stat_date = t2.max_date
+        ) c ON f.fund_code = c.fund_code
+        WHERE JSON_CONTAINS(JSON_UNQUOTE(m.index_names), CONCAT('"', #{indexName}, '"'), '$')
+    </select>
+</mapper> 

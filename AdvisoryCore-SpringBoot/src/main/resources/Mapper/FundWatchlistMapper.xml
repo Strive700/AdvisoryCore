@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxx.advisoryCore.Mapper.FundWatchlistMapper">
+    <delete id="deleteById">
+        DELETE FROM fund_watchlist WHERE watchlistid = #{watchlistId}
+    </delete>
+
+    <select id="selectFundWatchlistDetails" resultType="java.util.Map">
+        SELECT
+            w.watchlistid,
+            f.fund_code,
+            f.fund_name,
+            m.manager_name,
+            f.fund_type,
+            nh.unit_nav AS latest_nav,
+            nh.nav_date AS latest_nav_date,
+            c.return_1m,
+            c.return_ytd,
+            c.max_drawdown_1y,
+            f.operation_cycle,
+            f.fund_size,
+            f.inception_date,
+            c.quality_score,
+
+            -- 追加预警字段
+            fa.alertid,
+            fa.alert_param,
+            fa.trigger_date,
+            fa.actual_value,
+            fa.threshold,
+            fa.description,
+            fa.status AS alert_status,
+            fa.create_time AS alert_create_time
+
+        FROM fund_watchlist w
+                 JOIN funds f ON w.fund_code = f.fund_code
+                 JOIN fund_managers m ON f.manager_id = m.manager_id
+                 JOIN fund_core_metrics c ON f.fund_code = c.fund_code
+                 JOIN (
+            SELECT fund_code, unit_nav, nav_date
+            FROM fund_nav_history
+            WHERE (fund_code, nav_date) IN (
+                SELECT fund_code, MAX(nav_date)
+                FROM fund_nav_history
+                GROUP BY fund_code
+            )
+        ) nh ON f.fund_code = nh.fund_code
+
+            -- ✅ 左连接最新一条预警记录（按日期）
+                 LEFT JOIN (
+            SELECT t.*
+            FROM fund_alerts t
+                     JOIN (
+                SELECT fund_code, MAX(trigger_date) AS latest_date
+                FROM fund_alerts
+                GROUP BY fund_code
+            ) x ON t.fund_code = x.fund_code AND t.trigger_date = x.latest_date
+        ) fa ON f.fund_code = fa.fund_code
+    </select>
+
+    <select id="selectFundWatchlistDetailsPaged" resultType="java.util.Map">
+        SELECT
+            w.watchlistid,
+            f.fund_code,
+            f.fund_name,
+            m.manager_name,
+            f.fund_type,
+            nh.unit_nav AS latest_nav,
+            nh.nav_date AS latest_nav_date,
+            c.return_1m,
+            c.return_ytd,
+            c.max_drawdown_1y,
+            f.operation_cycle,
+            f.fund_size,
+            f.inception_date,
+            c.quality_score,
+            fa.alertid,
+            fa.alert_param,
+            fa.trigger_date,
+            fa.actual_value,
+            fa.threshold,
+            fa.description,
+            fa.status AS alert_status,
+            fa.create_time AS alert_create_time
+        FROM fund_watchlist w
+                 JOIN funds f ON w.fund_code = f.fund_code
+                 JOIN fund_managers m ON f.manager_id = m.manager_id
+                 JOIN fund_core_metrics c ON f.fund_code = c.fund_code
+                 JOIN (
+            SELECT fund_code, unit_nav, nav_date
+            FROM fund_nav_history
+            WHERE (fund_code, nav_date) IN (
+                SELECT fund_code, MAX(nav_date)
+                FROM fund_nav_history
+                GROUP BY fund_code
+            )
+        ) nh ON f.fund_code = nh.fund_code
+                 LEFT JOIN (
+            SELECT t.*
+            FROM fund_alerts t
+                     JOIN (
+                SELECT fund_code, MAX(trigger_date) AS latest_date
+                FROM fund_alerts
+                GROUP BY fund_code
+            ) x ON t.fund_code = x.fund_code AND t.trigger_date = x.latest_date
+        ) fa ON f.fund_code = fa.fund_code
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="countFundWatchlistDetails" resultType="int">
+        SELECT COUNT(*)
+        FROM fund_watchlist w
+                 JOIN funds f ON w.fund_code = f.fund_code
+                 JOIN fund_managers m ON f.manager_id = m.manager_id
+                 JOIN fund_core_metrics c ON f.fund_code = c.fund_code
+                 JOIN (
+            SELECT fund_code, unit_nav, nav_date
+            FROM fund_nav_history
+            WHERE (fund_code, nav_date) IN (
+                SELECT fund_code, MAX(nav_date)
+                FROM fund_nav_history
+                GROUP BY fund_code
+            )
+        ) nh ON f.fund_code = nh.fund_code
+                 LEFT JOIN (
+            SELECT t.*
+            FROM fund_alerts t
+                     JOIN (
+                SELECT fund_code, MAX(trigger_date) AS latest_date
+                FROM fund_alerts
+                GROUP BY fund_code
+            ) x ON t.fund_code = x.fund_code AND t.trigger_date = x.latest_date
+        ) fa ON f.fund_code = fa.fund_code
+    </select>
+
+</mapper>

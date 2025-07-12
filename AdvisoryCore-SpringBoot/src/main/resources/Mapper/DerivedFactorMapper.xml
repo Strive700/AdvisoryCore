@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xxx.advisoryCore.Mapper.DerivedFactorMapper">
+
+    <!-- 调试信息：插入衍生因子 -->
+    <insert id="insertDerivedFactors" parameterType="java.util.List">
+        <!-- 调试: 插入参数 factors = #{factors} -->
+        INSERT INTO derived_factors (derived_id, base_id, weight)
+        VALUES
+        <foreach collection="factors" item="factor" separator=",">
+            (#{factor.derivedId}, #{factor.baseId}, #{factor.weight})
+        </foreach>
+    </insert>
+    
+    <!-- 调试信息：删除衍生因子 -->
+    <delete id="deleteByDerivedId" parameterType="java.lang.Integer">
+        <!-- 调试: 删除参数 derivedId = #{derivedId} -->
+        DELETE FROM derived_factors WHERE derived_id = #{derivedId}
+    </delete>
+    
+    <!-- 调试信息：统计衍生因子 -->
+    <select id="countByDerivedId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        <!-- 调试: 查询参数 derivedId = #{derivedId} -->
+        SELECT COUNT(*) FROM derived_factors WHERE derived_id = #{derivedId}
+    </select>
+
+    <!-- 插入衍生因子定义，返回自增ID -->
+    <insert id="insertDerivedFactorDefinition" useGeneratedKeys="true" keyProperty="definitionid">
+        <!-- 调试: 插入参数 #{name}, #{displayName}, #{factorType}, #{dataType}, #{calcMethod}, #{updateFrequency}, #{enabled} -->
+        INSERT INTO factor_definitions
+        (name, display_name, factor_type, data_type, calc_method, update_frequency, enabled)
+        VALUES
+        (#{name}, #{displayName}, #{factorType}, #{dataType}, #{calcMethod}, #{updateFrequency}, #{enabled})
+    </insert>
+
+</mapper>
